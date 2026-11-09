@@ -11,6 +11,14 @@ jobs:
         with: { distribution: temurin, java-version: 17 }
       - run: npm install
       - run: npx cap add android
+      - name: remove ad permissions
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<manifest #<manifest xmlns:tools="http://schemas.android.com/tools" #' $M
+          for P in com.google.android.gms.permission.AD_ID android.permission.ACCESS_ADSERVICES_ATTRIBUTION android.permission.ACCESS_ADSERVICES_AD_ID android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE; do
+            sed -i "s#</manifest>#    <uses-permission android:name=\"$P\" tools:node=\"remove\"/>\n</manifest>#" $M
+          done
+          cat $M
       - run: npx cap sync android
       - run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
