@@ -1,7 +1,7 @@
 {
   "appId": "net.wardyat.amlak",
-  "appName": "أملاكي",
+  "appName": "ملك",
   "webDir": "www",
-  "server": { "url": "https://amlak.wardyat.net/app", "cleartext": false, "allowNavigation": ["amlak.wardyat.net", "core.wardyat.net", "wa.me"] },
+  "server": { "url": "https://amlak.wardyat.net/app", "cleartext": false, "allowNavigation": ["mulk.wardyat.net", "amlak.wardyat.net", "core.wardyat.net", "wa.me"] },
   "ios": { "contentInset": "always" }
 }
