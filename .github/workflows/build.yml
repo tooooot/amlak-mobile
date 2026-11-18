@@ -25,6 +25,12 @@ jobs:
           done
           cat $M
       - run: npx cap sync android
+      - name: firebase config + notification permission
+        env:
+          GS_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
+        run: |
+          echo "$GS_JSON_B64" | base64 -d > android/app/google-services.json
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>#' android/app/src/main/AndroidManifest.xml
       - name: sign with upload key
         run: |
           echo "$KS_B64" | base64 -d > android/upload.jks
