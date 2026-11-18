@@ -20,6 +20,31 @@ jobs:
           done
           cat $M
       - run: npx cap sync android
+      - name: sign with upload key
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KS_B64" | base64 -d > android/upload.jks
+          cat >> android/app/build.gradle <<EOF
+
+          android {
+              signingConfigs {
+                  upload {
+                      storeFile file('../upload.jks')
+                      storePassword System.getenv('KS_PASS')
+                      keyAlias System.getenv('KEY_ALIAS')
+                      keyPassword System.getenv('KEY_PASS')
+                  }
+              }
+              buildTypes {
+                  debug { signingConfig signingConfigs.upload }
+                  release { signingConfig signingConfigs.upload }
+              }
+          }
+          EOF
       - run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with: { name: amlaki-debug-apk, path: android/app/build/outputs/apk/debug/*.apk }
