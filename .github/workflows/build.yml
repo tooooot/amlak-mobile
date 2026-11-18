@@ -51,6 +51,10 @@ jobs:
               }
           }
           EOF
+      - name: brand icons (android)
+        run: |
+          pip install pillow
+          python3 ci/make_brand.py android android/app/src/main/res
       - run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with: { name: amlaki-debug-apk, path: android/app/build/outputs/apk/debug/*.apk }
