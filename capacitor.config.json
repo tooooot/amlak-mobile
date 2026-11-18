@@ -1,7 +1,7 @@
 {
-  "appId": "net.wardyat.amlak",
-  "appName": "ملك",
+  "appId": "net.wardyat.idaratamlak",
+  "appName": "إدارة أملاك",
   "webDir": "www",
-  "server": { "url": "https://amlak.wardyat.net/app", "cleartext": false, "allowNavigation": ["mulk.wardyat.net", "amlak.wardyat.net", "core.wardyat.net", "wa.me"] },
+  "server": { "url": "https://idaratamlak.wardyat.net/app", "cleartext": false, "allowNavigation": ["idaratamlak.wardyat.net", "core.wardyat.net", "wa.me"] },
   "ios": { "contentInset": "always" }
 }
