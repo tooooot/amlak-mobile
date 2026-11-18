@@ -25,7 +25,13 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with: { xcode-version: latest-stable }
       - run: npm install
-      - run: npx cap add ios
+      - name: add iOS project (deployment target 14 for social-login)
+        run: |
+          npx cap add ios || true
+          sed -i '' "s/platform :ios, '13.0'/platform :ios, '14.0'/" ios/App/Podfile
+          sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = 13.0;/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g" ios/App/App.xcodeproj/project.pbxproj
+          grep -n "platform :ios" ios/App/Podfile
+          cd ios/App && pod install
       - name: icon, splash, entitlements, Info.plist
         run: |
           A=ios/App/App
