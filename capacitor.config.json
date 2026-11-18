@@ -1,6 +1,6 @@
 {
   "appId": "net.wardyat.idaratamlak",
-  "appName": "إدارة أملاك",
+  "appName": "إدارة أملاكي",
   "webDir": "www",
   "server": { "url": "https://idaratamlak.wardyat.net/app", "cleartext": false, "allowNavigation": ["idaratamlak.wardyat.net", "core.wardyat.net", "wa.me"] },
   "ios": { "contentInset": "always" }

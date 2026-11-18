@@ -18,10 +18,15 @@ def bgimg(w,h):
     # دائرة زعفرانية شفافة في الزاوية
     ov=Image.new('RGBA',(w,h),(0,0,0,0)); ImageDraw.Draw(ov).ellipse((w*0.55,h*0.62,w*1.25,h*1.32),fill=ACC+(46,))
     return Image.alpha_composite(im.convert('RGBA'),ov).convert('RGB')
+def splash(W,H):
+    c=bgimg(W,H); u=min(W,H); m=mark(int(u*0.36)); wm=Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'wordmark.png')).convert('RGBA')
+    ww=int(u*0.46); wm=wm.resize((ww,int(wm.size[1]*ww/wm.size[0])),Image.LANCZOS)
+    total=m.size[1]+int(u*0.03)+wm.size[1]; y0=(H-total)//2
+    c.paste(m,((W-m.size[0])//2,y0),m); c.paste(wm,((W-ww)//2,y0+m.size[1]+int(u*0.03)),wm); return c
 def icons(out):
     os.makedirs(out,exist_ok=True)
     a=bgimg(1024,1024); m=mark(960); a.paste(m,((1024-960)//2,(1024-960)//2),m); a.save(out+'/icon.png')
-    s=bgimg(2732,2732); m=mark(1500); s.paste(m,((2732-1500)//2,(2732-1500)//2),m); s.save(out+'/splash.png')
+    splash(2732,2732).save(out+'/splash.png')
 def android(res):
     sizes={'mdpi':48,'hdpi':72,'xhdpi':96,'xxhdpi':144,'xxxhdpi':192}
     for dn,px in sizes.items():
@@ -35,6 +40,6 @@ def android(res):
     open(res+'/values/ic_launcher_background.xml','w').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#0E5C58</color>\n</resources>\n')
     import glob
     for p in glob.glob(res+'/drawable*/splash.png'):
-        W,H=Image.open(p).size; c=bgimg(W,H); m=mark(int(min(W,H)*0.55)); c.paste(m,((W-m.size[0])//2,(H-m.size[1])//2),m); c.save(p)
+        W,H=Image.open(p).size; splash(W,H).save(p)
 if __name__=='__main__':
     {'icons':icons,'android':android}[sys.argv[1]](sys.argv[2])
