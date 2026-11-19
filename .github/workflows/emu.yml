@@ -30,6 +30,8 @@ jobs:
         run: |
           echo "$GS_JSON_B64" | base64 -d > android/app/google-services.json
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>#' android/app/src/main/AndroidManifest.xml
+      - name: تهيئة أندرويد (SDK 36 وهوامش النظام)
+        run: bash ci/android_patch.sh
       - run: cd android && ./gradlew assembleDebug
       - name: تثبيت أدوات الاختبار
         run: cd ci && npm init -y >/dev/null && npm i ws@8 >/dev/null
@@ -39,7 +41,7 @@ jobs:
           sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 35
           arch: x86_64
           profile: pixel_6
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim

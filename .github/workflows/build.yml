@@ -55,6 +55,8 @@ jobs:
         run: |
           pip install pillow
           python3 ci/make_brand.py android android/app/src/main/res
+      - name: تهيئة أندرويد (SDK 36 وهوامش النظام)
+        run: bash ci/android_patch.sh
       - run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with: { name: amlaki-debug-apk, path: android/app/build/outputs/apk/debug/*.apk }
