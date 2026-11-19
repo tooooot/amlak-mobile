@@ -55,6 +55,10 @@ jobs:
         run: |
           pip install pillow
           python3 ci/make_brand.py android android/app/src/main/res
+      - name: الحد الأدنى لأندرويد 24 (شرط حماية Play)
+        run: |
+          sed -i 's/minSdkVersion = 22/minSdkVersion = 24/' android/variables.gradle
+          grep -n minSdk android/variables.gradle
       - name: رقم الإصدار
         run: |
           sed -i 's/versionCode 1/versionCode 1/; s/versionName "1.0"/versionName "1.0.0"/' android/app/build.gradle
