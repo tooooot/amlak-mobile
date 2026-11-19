@@ -1,0 +1,52 @@
+name: android-emulator-test
+on: workflow_dispatch
+jobs:
+  emu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - run: npm install
+      - name: يشير الغلاف إلى صفحة المالك التجريبية (سرّ) لتجاوز تسجيل الدخول
+        env: { EMU_URL: "${{ secrets.EMU_URL }}" }
+        run: |
+          python3 - <<'PY'
+          import json,os
+          c=json.load(open('capacitor.config.json')); c['server']['url']=os.environ['EMU_URL']; json.dump(c,open('capacitor.config.json','w'),ensure_ascii=False)
+          PY
+      - run: npx cap add android
+      - run: npx cap sync android
+      - name: firebase + إذن الإشعارات
+        env: { GS_JSON_B64: "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" }
+        run: |
+          echo "$GS_JSON_B64" | base64 -d > android/app/google-services.json
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>#' android/app/src/main/AndroidManifest.xml
+      - run: cd android && ./gradlew assembleDebug
+      - name: تثبيت أدوات الاختبار
+        run: cd ci && npm init -y >/dev/null && npm i ws@8 >/dev/null
+      - name: تمكين KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -n net.wardyat.idaratamlak/.MainActivity
+            OUT=$PWD/emu-out node ci/emu_test.js || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: emu-results, path: emu-out/ }
