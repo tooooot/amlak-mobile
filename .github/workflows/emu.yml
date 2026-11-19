@@ -47,6 +47,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            for i in $(seq 1 40); do adb shell ping -c 1 -W 2 idaratamlak.wardyat.net >/dev/null 2>&1 && break; sleep 3; done
             adb shell am start -n net.wardyat.idaratamlak/.MainActivity
             OUT=$PWD/emu-out node ci/emu_test.js || true
       - uses: actions/upload-artifact@v4
