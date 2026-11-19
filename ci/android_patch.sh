@@ -16,7 +16,9 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -25,6 +27,9 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         View root = findViewById(android.R.id.content);
         getWindow().getDecorView().setBackgroundColor(0xFFF8F3E9);
+        WindowInsetsControllerCompat wc = WindowCompat.getInsetsController(getWindow(), root);
+        wc.setAppearanceLightStatusBars(true);
+        wc.setAppearanceLightNavigationBars(true);
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
