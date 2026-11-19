@@ -18,7 +18,7 @@ async function connect() {
   ws.on('message', (m) => { const d = JSON.parse(m); if (d.id && pend[d.id]) { pend[d.id](d); delete pend[d.id]; } });
   rec('webview-attached', true, t.url);
 }
-const ev = (expression) => new Promise((ok) => { const i = ++id; const tm = setTimeout(() => { delete pend[i]; ok('__timeout__'); }, 8000); pend[i] = (d) => { clearTimeout(tm); ok(d.result && d.result.result ? d.result.result.value : undefined); }; ws.send(JSON.stringify({ id: i, method: 'Runtime.evaluate', params: { expression, awaitPromise: true, returnByValue: true } })); });
+const ev = (expression) => new Promise((ok) => { const i = ++id; const tm = setTimeout(() => { delete pend[i]; ok('__timeout__'); }, 8000); pend[i] = (d) => { clearTimeout(tm); ok(d.result && d.result.result ? d.result.result.value : undefined); }; ws.send(JSON.stringify({ id: i, method: 'Runtime.evaluate', params: { expression, awaitPromise: true, returnByValue: true, userGesture: true } })); });
 (async () => {
   await sleep(3000); rec('app-process-alive-at-launch', alive()); shot('01-launch');
   let ok = false; for (let i = 0; i < 25 && !ok; i++) { try { await connect(); ok = true; } catch (e) { await sleep(3000); } }
