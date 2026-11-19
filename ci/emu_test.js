@@ -18,7 +18,7 @@ async function connect() {
   ws.on('message', (m) => { const d = JSON.parse(m); if (d.id && pend[d.id]) { pend[d.id](d); delete pend[d.id]; } });
   rec('webview-attached', true, t.url);
 }
-const ev = (expression) => new Promise((ok) => { const i = ++id; pend[i] = (d) => ok(d.result && d.result.result ? d.result.result.value : undefined); ws.send(JSON.stringify({ id: i, method: 'Runtime.evaluate', params: { expression, awaitPromise: true, returnByValue: true } })); });
+const ev = (expression) => new Promise((ok) => { const i = ++id; const tm = setTimeout(() => { delete pend[i]; ok('__timeout__'); }, 8000); pend[i] = (d) => { clearTimeout(tm); ok(d.result && d.result.result ? d.result.result.value : undefined); }; ws.send(JSON.stringify({ id: i, method: 'Runtime.evaluate', params: { expression, awaitPromise: true, returnByValue: true } })); });
 (async () => {
   await sleep(3000); rec('app-process-alive-at-launch', alive()); shot('01-launch');
   let ok = false; for (let i = 0; i < 25 && !ok; i++) { try { await connect(); ok = true; } catch (e) { await sleep(3000); } }
@@ -30,7 +30,8 @@ const ev = (expression) => new Promise((ok) => { const i = ++id; pend[i] = (d) =
   rec('lead-step-exists', await ev('!!LEAD&&!!LEAD.t'), await ev('LEAD&&LEAD.t'));
   // الرجوع من تبويب إلى الرئيسية
   await ev("go('docs')"); await sleep(500); sh('adb shell input keyevent 4'); await sleep(1200);
-  rec('back-from-tab-returns-home', (await ev('TAB')) === 'home' && alive(), 'TAB=' + (await ev('TAB')));
+  const al1 = alive(); shot('02b-after-back'); rec('back-from-tab-returns-home', (await ev('TAB')) === 'home' && al1, `TAB=${await ev('TAB')} alive=${al1} hist=${await ev('history.length')} top=${top()}`);
+  if (!al1) { sh('adb shell am start -n net.wardyat.idaratamlak/.MainActivity'); await sleep(8000); try { ws.close(); } catch (e) {} for (let i = 0; i < 10; i++) { try { await connect(); break; } catch (e) { await sleep(2000); } } await sleep(6000); }
   // الرجوع يغلق النافذة السفلية فقط
   await ev("sheet('<h1>اختبار</h1>')"); await sleep(600); shot('03-sheet'); sh('adb shell input keyevent 4'); await sleep(1200);
   rec('back-closes-sheet-not-app', alive() && !(await ev("!!document.querySelector('#sh.on')")));
